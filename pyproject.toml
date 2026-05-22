@@ -8,16 +8,20 @@ dependencies = [
     "faker>=37.0.0",
     "httpx>=0.28.1",
     "locust>=2.32.0",
+    "playwright>=1.40.0",
     "pydantic>=2.10.0",
     "pydantic-settings>=2.7.0",
     "pytest>=8.3.0",
     "pytest-env>=1.1.5",
+    "pytest-playwright>=0.4.0",
     "pytest-xdist>=3.6.1",
 ]
 
 [project.optional-dependencies]
 dev = [
+    "mypy>=1.14.0",
     "ruff>=0.9.0",
+    "types-requests>=2.32.0",
 ]
 
 [build-system]
@@ -33,6 +37,7 @@ pythonpath = [".", "src"]
 addopts = "--alluredir=allure-results"
 env = [
     "BASE_URL=http://localhost:8000/api",
+    "UI_BASE_URL=http://localhost:4200",
 ]
 
 [tool.ruff]
@@ -53,4 +58,22 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["api_client", "config"]
+known-first-party = ["ai_engine", "api_client", "config", "data_factory", "ui_pages"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+exclude = ["tests/", "performance/"]
+
+[[tool.mypy.overrides]]
+module = [
+    "allure.*",
+    "faker.*",
+    "playwright.*",
+    "pydantic.*",
+    "pydantic_settings.*",
+]
+ignore_missing_imports = true
