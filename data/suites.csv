@@ -1,4 +1,4 @@
 "DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"Verify the tags service returns a validated TagsResponse with a list payload.","5","test_get_tags_returns_valid_response","tests.api","2026-05-22","passed","2026-05-22","","test_tags","",""
 "Verify generated user credentials can be entered into the sign-in form.","93","test_login_form_accepts_generated_user_credentials[chromium]","tests.ui","2026-05-22","passed","2026-05-22","","test_auth","",""
-"Verify a user can reach the sign-in page and see the login form.","105","test_user_can_navigate_to_login_page[chromium]","tests.ui","2026-05-22","passed","2026-05-22","","test_auth","",""
+"Verify a user can reach the sign-in page and see the login form.","95","test_user_can_navigate_to_login_page[chromium]","tests.ui","2026-05-22","passed","2026-05-22","","test_auth","",""
+"Verify the tags service returns a validated TagsResponse with a list payload.","5","test_get_tags_returns_valid_response","tests.api","2026-05-22","passed","2026-05-22","","test_tags","",""
