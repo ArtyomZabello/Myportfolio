@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Final
 
+from playwright.sync_api import expect
+
 from data_factory.builders import UserDTO
 from ui_pages.base_page import BasePage
 
@@ -17,6 +19,7 @@ class LoginPage(BasePage):
     EMAIL_INPUT: Final[str] = "input[placeholder='Email']"
     PASSWORD_INPUT: Final[str] = "input[placeholder='Password']"
     SIGN_IN_BUTTON: Final[str] = "button:has-text('Sign in')"
+    ERROR_MESSAGE: Final[str] = "#login-error"
 
     def login(self, user: UserDTO) -> HomePage:
         """Fill credentials and submit the sign-in form.
@@ -46,4 +49,19 @@ class LoginPage(BasePage):
         """Populate the sign-in form with the provided user credentials."""
         self.fill(self.EMAIL_INPUT, user.email, name="Fill email address")
         self.fill(self.PASSWORD_INPUT, user.password, name="Fill password")
+        return self
+
+    def submit_login(self) -> LoginPage:
+        """Submit the sign-in form without waiting for navigation."""
+        self.click(self.SIGN_IN_BUTTON, name="Submit sign in form")
+        return self
+
+    def assert_login_error_visible(self, *, message: str | None = None) -> LoginPage:
+        """Assert that a login error message is visible on the sign-in form."""
+        error = self.wait_for_visible(
+            self.ERROR_MESSAGE,
+            name="Assert login error message is visible",
+        )
+        if message is not None:
+            expect(error).to_have_text(message)
         return self
