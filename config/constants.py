@@ -69,9 +69,14 @@ BACKEND_POLL_INTERVAL_SECONDS: Final[float] = 1.0
 # ---------------------------------------------------------------------------
 LOCUST_ARTICLE_PAGE_LIMIT: Final[int] = 10
 LOCUST_ARTICLE_PAGE_OFFSET: Final[int] = 0
-LOCUST_PROFILE_USERNAMES: Final[tuple[str, ...]] = ("jake", "john", "alice", "bob")
 LOCUST_WAIT_MIN_SECONDS: Final[float] = 1.0
 LOCUST_WAIT_MAX_SECONDS: Final[float] = 3.0
+LOCUST_DATASET_V1_PATH: Final[str] = "performance/datasets/load_v1.json"
+
+# Profile lookup semantics for load tests (seeded users expect 200 after verify).
+PROFILE_LOOKUP_SUCCESS_STATUSES: Final[frozenset[int]] = frozenset({HTTP_OK})
+PROFILE_LOOKUP_MISSING_STATUSES: Final[frozenset[int]] = frozenset({HTTP_NOT_FOUND})
+PROFILE_LOOKUP_BACKEND_ANOMALY_STATUSES: Final[frozenset[int]] = frozenset({HTTP_BAD_REQUEST})
 
 # ---------------------------------------------------------------------------
 # Mock UI credentials (must stay in sync with ``scripts/mock_conduit_ui/login.html``)

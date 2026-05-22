@@ -18,6 +18,9 @@ env/
 # Pytest
 .pytest_cache/
 
+# Locust / performance
+performance/load_data.json
+
 # Allure
 allure-results/
 allure-report/
