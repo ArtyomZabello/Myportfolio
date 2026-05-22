@@ -102,7 +102,14 @@ jobs:
             zap-baseline.py \
             -t http://localhost:8000/api \
             -c zap_baseline.conf \
-            -r zap_report.html || true
+            -r zap_baseline_report.html || true
+          docker run --rm --network host \
+            -v "${{ github.workspace }}/security:/zap/wrk/:rw" \
+            -t ghcr.io/zaproxy/zaproxy:stable \
+            zap-api-scan.py \
+            -t http://localhost:8000/openapi.json \
+            -f openapi \
+            -r zap_api_report.html || true
 
       - name: Upload Test Results
         if: always()
@@ -111,7 +118,7 @@ jobs:
           name: all-test-results
           path: |
             allure-results/
-            security/zap_report.html
+            security/*_report.html
             performance/locust_report.html
           if-no-files-found: ignore
 
@@ -147,7 +154,7 @@ jobs:
           allure generate downloaded-artifacts/allure-results -o allure-report --clean
           
           # Копируем отчеты ZAP и Locust в папку сайта (allure-report)
-          cp downloaded-artifacts/security/zap_report.html allure-report/ || true
+          cp downloaded-artifacts/security/*_report.html allure-report/ || true
           cp downloaded-artifacts/performance/locust_report.html allure-report/ || true
 
       - name: Deploy to GitHub Pages

@@ -7,6 +7,15 @@
 Production-grade test automation framework for the **Conduit (RealWorld)** application.  
 Built as a multi-layer SDET platform covering functional, performance, security, and AI-assisted diagnostics.
 
+## 📊 Live Test Reports (GitHub Pages)
+
+| Report | Link |
+|---|---|
+| **Functional Tests (Allure)** | [https://artyomzabello.github.io/Myportfolio/](https://artyomzabello.github.io/Myportfolio/) |
+| **Performance Tests (Locust)** | [https://artyomzabello.github.io/Myportfolio/locust_report.html](https://artyomzabello.github.io/Myportfolio/locust_report.html) |
+| **Security Baseline Scan (ZAP)** | [https://artyomzabello.github.io/Myportfolio/zap_baseline_report.html](https://artyomzabello.github.io/Myportfolio/zap_baseline_report.html) |
+| **Security API Scan (ZAP)** | [https://artyomzabello.github.io/Myportfolio/zap_api_report.html](https://artyomzabello.github.io/Myportfolio/zap_api_report.html) |
+
 ---
 
 ## Architecture
