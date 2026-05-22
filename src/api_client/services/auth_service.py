@@ -7,7 +7,11 @@ import allure
 from api_client.base_client import BaseAPIClient
 from api_client.exceptions import APIResponseError
 from api_client.models.auth_models import UserResponse
-from config.constants import API_PATH_USERS, API_PATH_USERS_LOGIN, HTTP_CREATED, HTTP_OK
+from config.constants import (
+    API_PATH_USERS,
+    API_PATH_USERS_LOGIN,
+    SUCCESS_CREATE_STATUSES,
+)
 from data_factory.builders import UserDTO
 
 
@@ -18,7 +22,7 @@ class AuthService(BaseAPIClient):
         """Register a new user and return the typed registration payload."""
         with allure.step("Register new user"):
             response = self._request("POST", API_PATH_USERS, json=user.to_registration_payload())
-            if response.status_code != HTTP_CREATED:
+            if response.status_code not in SUCCESS_CREATE_STATUSES:
                 raise APIResponseError(
                     method="POST",
                     endpoint=API_PATH_USERS,
@@ -35,7 +39,7 @@ class AuthService(BaseAPIClient):
                 API_PATH_USERS_LOGIN,
                 json={"user": {"email": email, "password": password}},
             )
-            if response.status_code != HTTP_OK:
+            if response.status_code not in SUCCESS_CREATE_STATUSES:
                 raise APIResponseError(
                     method="POST",
                     endpoint=API_PATH_USERS_LOGIN,

@@ -14,13 +14,13 @@ from config.constants import (
     API_PATH_USERS_LOGIN,
     HTTP_NOT_FOUND,
     HTTP_OK,
-    HTTP_UNAUTHORIZED,
-    HTTP_UNPROCESSABLE,
     LOCUST_ARTICLE_PAGE_LIMIT,
     LOCUST_ARTICLE_PAGE_OFFSET,
     LOCUST_PROFILE_USERNAMES,
     LOCUST_WAIT_MAX_SECONDS,
     LOCUST_WAIT_MIN_SECONDS,
+    REJECTED_AUTH_STATUSES,
+    REJECTED_VALIDATION_STATUSES,
     profile_path,
 )
 from config.settings import Config
@@ -111,7 +111,7 @@ class UserBehavior(FastHttpUser):
             name="POST /users/login",
             catch_response=True,
         ) as response:
-            if response.status_code in (HTTP_UNAUTHORIZED, HTTP_UNPROCESSABLE):
+            if response.status_code in REJECTED_AUTH_STATUSES | REJECTED_VALIDATION_STATUSES:
                 response.success()
             elif response.status_code != HTTP_OK:
                 response.failure(f"Unexpected status {response.status_code}")

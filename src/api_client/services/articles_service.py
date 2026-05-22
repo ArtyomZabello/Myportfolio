@@ -8,7 +8,7 @@ from api_client.base_client import BaseAPIClient
 from api_client.exceptions import APIResponseError
 from api_client.headers import authorization_headers
 from api_client.models.articles_models import ArticleResponse, ArticlesFeedResponse
-from config.constants import API_PATH_ARTICLES, HTTP_CREATED, HTTP_OK, article_path
+from config.constants import API_PATH_ARTICLES, HTTP_OK, SUCCESS_CREATE_STATUSES, article_path
 from data_factory.builders import ArticleDTO
 
 
@@ -52,7 +52,7 @@ class ArticlesService(BaseAPIClient):
                 json=article.to_create_payload(),
                 headers=authorization_headers(token),
             )
-            if response.status_code != HTTP_CREATED:
+            if response.status_code not in SUCCESS_CREATE_STATUSES:
                 raise APIResponseError(
                     method="POST",
                     endpoint=API_PATH_ARTICLES,

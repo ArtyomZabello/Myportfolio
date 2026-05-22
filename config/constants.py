@@ -36,10 +36,19 @@ def article_comment_path(slug: str, comment_id: int) -> str:
 # ---------------------------------------------------------------------------
 HTTP_OK: Final[int] = 200
 HTTP_CREATED: Final[int] = 201
+HTTP_BAD_REQUEST: Final[int] = 400
 HTTP_UNAUTHORIZED: Final[int] = 401
+HTTP_FORBIDDEN: Final[int] = 403
 HTTP_UNPROCESSABLE: Final[int] = 422
 HTTP_NOT_FOUND: Final[int] = 404
-HTTP_FORBIDDEN: Final[int] = 403
+
+SUCCESS_CREATE_STATUSES: Final[frozenset[int]] = frozenset({HTTP_OK, HTTP_CREATED})
+
+# Negative auth paths differ between RealWorld spec (422/401) and FastAPI backend (400/403).
+REJECTED_VALIDATION_STATUSES: Final[frozenset[int]] = frozenset(
+    {HTTP_BAD_REQUEST, HTTP_UNPROCESSABLE},
+)
+REJECTED_AUTH_STATUSES: Final[frozenset[int]] = frozenset({HTTP_UNAUTHORIZED, HTTP_FORBIDDEN})
 
 # ---------------------------------------------------------------------------
 # Backend health polling (``scripts/wait_for_backend.py``)

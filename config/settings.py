@@ -53,5 +53,5 @@ class Config(BaseSettings):
     SECURITY_MAX_HIGH_ALERTS: int = Field(
         default=0,
         ge=0,
-        description="Maximum allowed High or Critical OWASP ZAP alerts before CI fails.",
+        description="Maximum allowed Medium+ OWASP ZAP alerts before CI fails.",
     )
