@@ -1,34 +1,27 @@
-.PHONY: env up down wait-for-backend test-api test-load run-all
+.PHONY: env up down wait-for-backend test-api test-load test-security run-all run-all-py
 
 env:
 	@if [ ! -f .env ]; then cp .env.example .env; fi
 
 up:
-	docker-compose -f app/docker-compose.yml up -d
+	docker compose -f app/docker-compose.yml up -d --build
 
 down:
-	docker-compose -f app/docker-compose.yml down -v
+	docker compose -f app/docker-compose.yml down -v
 
 wait-for-backend:
-	@echo "Waiting for Conduit backend to become healthy..."
-	@health_url=$$(python -c "from config.settings import Config; print(Config().BASE_URL.rstrip('/') + '/tags')"); \
-	timeout=30; \
-	elapsed=0; \
-	while [ $$elapsed -lt $$timeout ]; do \
-		if curl -sf "$$health_url" > /dev/null 2>&1; then \
-			echo "Backend is ready at $$health_url"; \
-			exit 0; \
-		fi; \
-		sleep 1; \
-		elapsed=$$((elapsed + 1)); \
-	done; \
-	echo "Backend did not become healthy within $$timeout seconds."; \
-	exit 1
+	python scripts/wait_for_backend.py
+
+run-all-py:
+	python scripts/run_all.py
 
 test-api:
 	pytest tests/api/ -v --alluredir=allure-results
 
 test-load:
 	locust -f performance/locustfile.py --headless -u 50 -r 10 --run-time 1m --host $$(python -c "from config.settings import Config; print(Config().BASE_URL.rstrip('/'))")
+
+test-security:
+	docker run --rm -v $$(pwd)/security:/zap/wrk/:rw -t ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t $$(python -c "from config.settings import Config; print(Config().BASE_URL)") -c zap_baseline.conf -r zap_report.html || true
 
 run-all: env up wait-for-backend test-api down

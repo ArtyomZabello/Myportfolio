@@ -9,6 +9,7 @@ class Config(BaseSettings):
 
     Attributes:
         BASE_URL: Root URL for Conduit API requests.
+        UI_BASE_URL: Root URL for the Conduit frontend application.
         API_TIMEOUT: Default HTTP timeout in seconds for API calls.
         GEMINI_API_KEY: Optional API key reserved for future AI RCA integrations.
     """
@@ -22,6 +23,10 @@ class Config(BaseSettings):
     BASE_URL: str = Field(
         default="http://localhost:8000/api",
         description="Base URL for the Conduit API.",
+    )
+    UI_BASE_URL: str = Field(
+        default="http://localhost:4200",
+        description="Base URL for the Conduit frontend application.",
     )
     API_TIMEOUT: float = Field(
         default=10.0,
