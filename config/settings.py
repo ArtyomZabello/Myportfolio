@@ -37,3 +37,21 @@ class Config(BaseSettings):
         default=None,
         description="Optional Gemini API key for AI-assisted root cause analysis.",
     )
+    ALLOW_SECURITY_FAILURES: bool = Field(
+        default=False,
+        description="When true, non-zero OWASP ZAP exit codes do not fail CI scripts.",
+    )
+    ALLOW_LOAD_FAILURES: bool = Field(
+        default=False,
+        description="When true, Locust threshold violations do not fail CI scripts.",
+    )
+    LOCUST_P95_THRESHOLD_MS: float = Field(
+        default=2000.0,
+        gt=0,
+        description="Maximum allowed aggregated p95 response time in milliseconds.",
+    )
+    SECURITY_MAX_HIGH_ALERTS: int = Field(
+        default=0,
+        ge=0,
+        description="Maximum allowed High or Critical OWASP ZAP alerts before CI fails.",
+    )

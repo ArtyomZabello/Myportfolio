@@ -6,7 +6,6 @@ import os
 import shutil
 import subprocess
 import sys
-import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -85,7 +84,6 @@ def main() -> int:
             _run([*compose_command, "up", "-d", "--build"])
         else:
             mock_process = _start_mock_server()
-            time.sleep(1)
 
         health_exit_code = _run(
             [sys.executable, "scripts/wait_for_backend.py"],
@@ -95,7 +93,16 @@ def main() -> int:
             return health_exit_code
 
         api_exit_code = _run(
-            [sys.executable, "-m", "pytest", "tests/api/", "-v", "--alluredir=allure-results"],
+            [
+                sys.executable,
+                "-m",
+                "pytest",
+                "tests/api/",
+                "-m",
+                "not demo",
+                "-v",
+                "--alluredir=allure-results",
+            ],
             check=False,
         ).returncode
         return api_exit_code

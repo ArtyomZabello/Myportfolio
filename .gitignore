@@ -21,6 +21,7 @@ env/
 # Allure
 allure-results/
 allure-report/
+test-results/
 
 # Ruff
 .ruff_cache/

@@ -31,8 +31,8 @@ class BasePage:
         """Click an element after recording the action in Allure."""
         step_name = name or f"Click '{locator}'"
         with allure.step(step_name):
-            target = self._resolve_locator(locator, timeout_ms=timeout_ms)
-            target.click()
+            target = self._resolve_locator(locator)
+            target.click(timeout=timeout_ms or self.DEFAULT_TIMEOUT_MS)
 
     def fill(
         self,
@@ -43,22 +43,10 @@ class BasePage:
         timeout_ms: int | None = None,
     ) -> None:
         """Fill an input element after recording the action in Allure."""
-        step_name = name or f"Fill '{locator}'"
+        step_name = name or f"Enter value into '{locator}'"
         with allure.step(step_name):
-            target = self._resolve_locator(locator, timeout_ms=timeout_ms)
-            target.fill(value)
-
-    def navigate(
-        self,
-        url: str,
-        *,
-        name: str | None = None,
-        timeout_ms: int | None = None,
-    ) -> None:
-        """Navigate to a URL after recording the action in Allure."""
-        step_name = name or f"Navigate to '{url}'"
-        with allure.step(step_name):
-            self.page.goto(url, timeout=timeout_ms or self.DEFAULT_TIMEOUT_MS)
+            target = self._resolve_locator(locator)
+            target.fill(value, timeout=timeout_ms or self.DEFAULT_TIMEOUT_MS)
 
     def wait_for_visible(
         self,
@@ -68,12 +56,12 @@ class BasePage:
         timeout_ms: int | None = None,
     ) -> Locator:
         """Wait until an element becomes visible and return its locator."""
-        step_name = name or f"Wait for visible '{locator}'"
+        step_name = name or f"Verify '{locator}' is visible"
         with allure.step(step_name):
-            target = self._resolve_locator(locator, timeout_ms=timeout_ms)
+            target = self._resolve_locator(locator)
             expect(target).to_be_visible(timeout=timeout_ms or self.DEFAULT_TIMEOUT_MS)
             return target
 
-    def _resolve_locator(self, locator: str, *, timeout_ms: int | None = None) -> Locator:
+    def _resolve_locator(self, locator: str) -> Locator:
         """Resolve a selector string to a Playwright locator."""
         return self.page.locator(locator).first

@@ -3,49 +3,47 @@
 from __future__ import annotations
 
 import allure
+import pytest
 
+from config.constants import MOCK_UI_LOGIN_ERROR_MESSAGE
 from data_factory.builders import UserDTO
 from ui_pages.app import App
 
-_VALID_LOGIN_USER = UserDTO(
-    username="testuser",
-    email="test@example.com",
-    password="password123",
-)
-_INVALID_LOGIN_USER = UserDTO(
-    username="baduser",
-    email="wrong@example.com",
-    password="wrongpassword",
-)
 
-
+@pytest.mark.smoke
+@pytest.mark.regression
 @allure.feature("Authentication")
 @allure.story("Login flow")
-@allure.title("User can sign in with valid credentials")
+@allure.title("Sign in with valid credentials")
 def test_successful_login(ui_app: App) -> None:
     """Verify a user with valid credentials is redirected to the home page after sign-in."""
-    with allure.step("Open the sign-in page from the home navigation"):
+    valid_user = UserDTO.mock_ui_valid()
+
+    with allure.step("Open sign-in page from home navigation"):
         ui_app.home_page.assert_home_page_loaded()
         ui_app.home_page.open_sign_in()
         ui_app.login_page.assert_sign_in_form_visible()
 
-    with allure.step("Submit valid credentials and land on the home page"):
-        ui_app.login_page.login(_VALID_LOGIN_USER)
+    with allure.step("Submit valid credentials and verify home page is loaded"):
+        ui_app.login_page.login(valid_user)
         ui_app.home_page.assert_home_page_loaded()
 
 
+@pytest.mark.regression
 @allure.feature("Authentication")
 @allure.story("Login flow")
-@allure.title("Invalid credentials show an error message on the sign-in form")
+@allure.title("Show error message for invalid credentials")
 def test_failed_login_shows_error_message(ui_app: App) -> None:
     """Verify invalid credentials keep the user on the login page with an error message."""
-    with allure.step("Open the sign-in page from the home navigation"):
+    invalid_user = UserDTO.mock_ui_invalid()
+
+    with allure.step("Open sign-in page from home navigation"):
         ui_app.home_page.assert_home_page_loaded()
         ui_app.home_page.open_sign_in()
         ui_app.login_page.assert_sign_in_form_visible()
 
     with allure.step("Submit invalid credentials"):
-        ui_app.login_page.fill_credentials(_INVALID_LOGIN_USER).submit_login()
+        ui_app.login_page.fill_credentials(invalid_user).submit_login()
 
-    with allure.step("Verify an error message is displayed on the page"):
-        ui_app.login_page.assert_login_error_visible(message="Invalid email or password")
+    with allure.step("Verify login error message is displayed"):
+        ui_app.login_page.assert_login_error_visible(message=MOCK_UI_LOGIN_ERROR_MESSAGE)

@@ -5,6 +5,7 @@ import allure
 from api_client.base_client import BaseAPIClient
 from api_client.exceptions import APIResponseError
 from api_client.models.tags_models import TagsResponse
+from config.constants import API_PATH_TAGS, HTTP_OK
 
 
 class TagsService(BaseAPIClient):
@@ -21,13 +22,13 @@ class TagsService(BaseAPIClient):
             APIResponseError: If the server returns a non-success status code.
             ValidationError: If the response body does not match ``TagsResponse``.
         """
-        with allure.step("Get all system tags"):
-            response = self._request("GET", "/tags")
+        with allure.step("Retrieve system tags"):
+            response = self._request("GET", API_PATH_TAGS)
 
-            if response.is_error:
+            if response.status_code != HTTP_OK:
                 raise APIResponseError(
                     method="GET",
-                    endpoint="/tags",
+                    endpoint=API_PATH_TAGS,
                     status_code=response.status_code,
                     response_text=response.text,
                 )

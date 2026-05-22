@@ -1,11 +1,11 @@
-# Enterprise Test Automation Framework (Python / Playwright / Locust / DAST)
+# Advanced SDET Automation Framework (Python / Playwright / Locust / DAST)
 
 [![CI](https://github.com/ArtyomZabello/Myportfolio/actions/workflows/main.yml/badge.svg)](https://github.com/ArtyomZabello/Myportfolio/actions/workflows/main.yml)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![Allure Report](https://img.shields.io/badge/report-allure-orange.svg)](https://artyomzabello.github.io/Myportfolio/)
 
-Production-grade test automation framework for the **Conduit (RealWorld)** application.  
-Built as a multi-layer SDET platform covering functional, performance, security, and AI-assisted diagnostics.
+Multi-layer SDET automation showcase for the **Conduit (RealWorld)** application.  
+Covers functional API/UI testing, load testing, DAST security scans, and optional AI-assisted failure analysis.
 
 ## 📊 Live Test Reports (GitHub Pages)
 
@@ -20,13 +20,13 @@ Built as a multi-layer SDET platform covering functional, performance, security,
 
 ## Architecture
 
-The framework follows a layered architecture with clear separation of concerns:
+The framework follows a production-inspired layered architecture with clear separation of concerns:
 
 | Layer | Location | Responsibility |
 |---|---|---|
 | **Configuration** | `config/settings.py` | Centralized Pydantic settings from `.env` |
 | **SUT** | `app/docker-compose.yml` | Containerized Conduit API + PostgreSQL |
-| **API** | `src/api_client/` | httpx client, Pydantic DTOs, service layer |
+| **API** | `src/api_client/` | httpx client, typed services, Pydantic DTOs |
 | **Data Factory** | `src/data_factory/` | Faker-backed `UserDTO` / `ArticleDTO` builders |
 | **UI (POM)** | `src/ui_pages/` | Playwright Page Objects + App facade |
 | **Performance** | `performance/locustfile.py` | Locust `FastHttpUser` load scenarios |
@@ -70,12 +70,13 @@ The workflow is defined in [`.github/workflows/main.yml`](.github/workflows/main
 1. **Linter & Type Check** — `ruff check` + `mypy`
 2. **Test Execution Layer**
    - Start SUT via `docker compose`
-   - Health check via `scripts/wait_for_backend.py`
-   - API tests (`pytest tests/api/`)
-   - UI tests headless (`pytest tests/ui/`)
-   - Load smoke test (Locust, 30s)
-   - OWASP ZAP baseline scan (Docker container, `--network host`)
+   - Health check via `scripts/wait_for_backend.py` and `scripts/wait_for_ui.py`
+   - API tests (`pytest tests/api/ -m "not demo"`)
+   - UI tests with Playwright traces on failure
+   - Load smoke test (Locust, 30s) with p95 threshold gate
+   - OWASP ZAP baseline + OpenAPI scans with configurable security gate
 3. **Reporting** — Allure report published to GitHub Pages (`gh-pages`)
+4. **AI RCA Demo** — manual `workflow_dispatch` job runs `@pytest.mark.demo` test
 
 ### AI RCA in CI (Fail-Safe)
 
@@ -209,7 +210,10 @@ Myportfolio/
 | `BASE_URL` | `http://localhost:8000/api` | Conduit API base URL |
 | `UI_BASE_URL` | `http://localhost:4200` | Conduit frontend URL |
 | `API_TIMEOUT` | `10.0` | HTTP timeout (seconds) |
-| `GEMINI_API_KEY` | *(empty)* | Optional Gemini key for AI RCA |
+| `GEMINI_API_KEY` | *(empty)* | Optional Gemini key for AI RCA demo job |
+| `ALLOW_SECURITY_FAILURES` | `false` | Skip failing CI when ZAP scans report issues |
+| `ALLOW_LOAD_FAILURES` | `false` | Skip failing CI when Locust p95 exceeds threshold |
+| `LOCUST_P95_THRESHOLD_MS` | `2000` | Aggregated p95 threshold for load smoke gate |
 
 Copy [`.env.example`](.env.example) to `.env` and adjust as needed.
 
