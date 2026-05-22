@@ -1,0 +1,1 @@
+{"detail":[{"loc":["body","user","email"],"msg":"value is not a valid email address","type":"value_error.email"}]}

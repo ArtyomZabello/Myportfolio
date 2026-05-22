@@ -1,4 +1,13 @@
 "DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"Verify generated user credentials can be entered into the sign-in form.","93","test_login_form_accepts_generated_user_credentials[chromium]","tests.ui","2026-05-22","passed","2026-05-22","","test_auth","",""
-"Verify a user can reach the sign-in page and see the login form.","95","test_user_can_navigate_to_login_page[chromium]","tests.ui","2026-05-22","passed","2026-05-22","","test_auth","",""
-"Verify the tags service returns a validated TagsResponse with a list payload.","5","test_get_tags_returns_valid_response","tests.api","2026-05-22","passed","2026-05-22","","test_tags","",""
+"Verify the tags service returns a validated TagsResponse with a list payload.","3","test_get_tags_returns_valid_response","tests.api","2026-05-22","passed","2026-05-22","","test_tags","",""
+"Verify the login endpoint rejects malformed or incorrect credentials.","3","POST /users/login rejects invalid credentials (401)","tests.api","2026-05-22","failed","2026-05-22","","test_auth_negative","",""
+"Verify article creation is blocked when no authentication token is supplied.","3","POST /articles without token returns 401 Unauthorized","tests.api","2026-05-22","failed","2026-05-22","","test_auth_negative","",""
+"Demonstrate AI root cause analysis on a deliberately failing assertion.
+
+    Sends a registration request with an invalid email address and asserts
+    HTTP 201 even though the backend is expected to return 422 Unprocessable Entity.
+    ","3","Intentional failure — invalid email registration (AI RCA demo)","tests.api","2026-05-22","failed","2026-05-22","","test_auth_negative","",""
+"Verify the login endpoint rejects malformed or incorrect credentials.","3","POST /users/login rejects invalid credentials (422)","tests.api","2026-05-22","failed","2026-05-22","","test_auth_negative","",""
+"Verify an authorized user can publish a new article.","0","POST /articles creates an article for an authenticated user","tests.api","2026-05-22","failed","2026-05-22","","test_articles","",""
+"Verify the articles endpoint returns HTTP 200 with an articles collection.","8","GET /articles returns a paginated list of articles","tests.api","2026-05-22","passed","2026-05-22","","test_articles","",""
+"Verify the login endpoint rejects malformed or incorrect credentials.","4","POST /users/login rejects invalid credentials (422)","tests.api","2026-05-22","failed","2026-05-22","","test_auth_negative","",""
