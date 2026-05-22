@@ -1,7 +1,7 @@
 [project]
 name = "conduit-test-framework"
 version = "0.1.0"
-description = "Enterprise test automation framework for the Conduit (RealWorld) application."
+description = "Advanced multi-layer SDET automation framework for the Conduit (RealWorld) application."
 requires-python = ">=3.12"
 dependencies = [
     "allure-pytest>=2.13.5",
@@ -29,12 +29,20 @@ requires = ["setuptools>=75.0.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["src", "."]
+include = ["config*", "api_client*", "ai_engine*", "data_factory*", "ui_pages*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = [".", "src"]
 addopts = "--alluredir=allure-results"
+markers = [
+    "smoke: fast critical-path checks",
+    "regression: broader functional coverage",
+    "security: security-related scenarios",
+    "contract: API contract validation",
+    "demo: AI RCA demonstration excluded from default CI",
+]
 env = [
     "BASE_URL=http://localhost:8000/api",
     "UI_BASE_URL=http://localhost:4200",
@@ -66,7 +74,7 @@ warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
 check_untyped_defs = true
-exclude = ["tests/", "performance/"]
+exclude = ["performance/"]
 
 [[tool.mypy.overrides]]
 module = [

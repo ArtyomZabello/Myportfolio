@@ -1,220 +1,198 @@
-# Enterprise Test Automation Framework (Python / Playwright / Locust / DAST)
+# Conduit Test Lab
 
 [![CI](https://github.com/ArtyomZabello/Myportfolio/actions/workflows/main.yml/badge.svg)](https://github.com/ArtyomZabello/Myportfolio/actions/workflows/main.yml)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![Allure Report](https://img.shields.io/badge/report-allure-orange.svg)](https://artyomzabello.github.io/Myportfolio/)
 
-Production-grade test automation framework for the **Conduit (RealWorld)** application.  
-Built as a multi-layer SDET platform covering functional, performance, security, and AI-assisted diagnostics.
+Pet-проект по автоматизации тестирования. Проверяю [Conduit (RealWorld API)](https://github.com/gothinkster/realworld) на нескольких уровнях и прогоняю всё через GitHub Actions. Отчёты лежат на [GitHub Pages](https://artyomzabello.github.io/Myportfolio/).
 
-## 📊 Live Test Reports (GitHub Pages)
-
-| Report | Link |
-|---|---|
-| **Functional Tests (Allure)** | [https://artyomzabello.github.io/Myportfolio/](https://artyomzabello.github.io/Myportfolio/) |
-| **Performance Tests (Locust)** | [https://artyomzabello.github.io/Myportfolio/locust_report.html](https://artyomzabello.github.io/Myportfolio/locust_report.html) |
-| **Security Baseline Scan (ZAP)** | [https://artyomzabello.github.io/Myportfolio/zap_baseline_report.html](https://artyomzabello.github.io/Myportfolio/zap_baseline_report.html) |
-| **Security API Scan (ZAP)** | [https://artyomzabello.github.io/Myportfolio/zap_api_report.html](https://artyomzabello.github.io/Myportfolio/zap_api_report.html) |
+> English version — [below](#english)
 
 ---
 
-## Architecture
+## Что проверяется
 
-The framework follows a layered architecture with clear separation of concerns:
+- **API** — регистрация, логин, статьи, комментарии, теги (`pytest`, `httpx`)
+- **UI** — логин и базовые сценарии (`Playwright`, заглушка интерфейса на `:4200`)
+- **Нагрузка** — короткий smoke-тест на Locust с проверкой p95
+- **Security** — OWASP ZAP: baseline и OpenAPI scan
 
-| Layer | Location | Responsibility |
-|---|---|---|
-| **Configuration** | `config/settings.py` | Centralized Pydantic settings from `.env` |
-| **SUT** | `app/docker-compose.yml` | Containerized Conduit API + PostgreSQL |
-| **API** | `src/api_client/` | httpx client, Pydantic DTOs, service layer |
-| **Data Factory** | `src/data_factory/` | Faker-backed `UserDTO` / `ArticleDTO` builders |
-| **UI (POM)** | `src/ui_pages/` | Playwright Page Objects + App facade |
-| **Performance** | `performance/locustfile.py` | Locust `FastHttpUser` load scenarios |
-| **Security (DAST)** | `security/` | OWASP ZAP baseline scan configuration |
-| **AI RCA** | `src/ai_engine/` | Gemini 1.5 Flash fail-safe root cause analysis |
+## Как работает CI
 
-```
-┌─────────────┐     ┌──────────────┐     ┌─────────────────┐
-│   Tests     │────▶│  Framework   │────▶│  Conduit SUT    │
-│ API/UI/Load │     │ Layers + AI  │     │ :8000 / :4200   │
-└─────────────┘     └──────────────┘     └─────────────────┘
-       │                    │
-       ▼                    ▼
-  Allure Report      OWASP ZAP DAST
-  (GitHub Pages)     (baseline scan)
+Процесс описан в [`.github/workflows/main.yml`](.github/workflows/main.yml).
+
+Сначала **lint** (`ruff`, `mypy`). Если ок — три задачи идут **параллельно**:
+
+- **api-tests** — поднимает тестируемую систему в Docker, гоняет API-тесты
+- **ui-tests** — Playwright в контейнере, заглушка интерфейса на `:4200`
+- **load-security** — свой Docker, подготовка данных → Locust → ZAP
+
+После тестов **report** скачивает Allure-отчёты из всех задач, собирает общий отчёт и выкладывает на Pages (только push в `main`). **notify** шлёт ссылки в Telegram.
+
+```mermaid
+flowchart LR
+    lint --> api[api-tests]
+    lint --> ui[ui-tests]
+    lint --> load[load-security]
+    api --> report
+    ui --> report
+    load --> report
+    report --> notify
 ```
 
----
+## Основные идеи
 
-## Tech Stack
+- API, UI, нагрузка и security — отдельные задачи, не один длинный прогон
+- API и нагрузка поднимают **свою** тестируемую систему в Docker и не делят базу
+- Нагрузочные данные фиксированы (`performance/datasets/load_v1.json`), перед Locust — шаг verify
+- Отчёты из параллельных задач склеиваются в одной задаче report
 
-- **Python 3.12** — strict typing, Pydantic v2
-- **pytest** + **pytest-playwright** + **pytest-xdist**
-- **httpx** — synchronous API client
-- **Playwright** — UI automation (headless in CI)
-- **Locust** — performance / load testing
-- **Faker** — synthetic test data
-- **Allure** — rich test reporting
-- **OWASP ZAP** — DAST security baseline
-- **Google Gemini 1.5 Flash** — optional AI root cause analysis
-- **Docker Compose** — reproducible SUT
-- **GitHub Actions** — CI/CD pipeline
-- **Ruff** + **Mypy** — linting and static type checking
+Pet-проект для портфолио: показать, как собрать многослойную автоматизацию без одной тяжёлой CI-задачи.
 
----
+## Технологии
 
-## CI/CD Pipeline
+Python 3.12 · pytest · httpx · Pydantic · Playwright · Locust · OWASP ZAP · Allure · Docker Compose · GitHub Actions · Ruff · Mypy · Faker
 
-The workflow is defined in [`.github/workflows/main.yml`](.github/workflows/main.yml):
+## Запуск локально
 
-1. **Linter & Type Check** — `ruff check` + `mypy`
-2. **Test Execution Layer**
-   - Start SUT via `docker compose`
-   - Health check via `scripts/wait_for_backend.py`
-   - API tests (`pytest tests/api/`)
-   - UI tests headless (`pytest tests/ui/`)
-   - Load smoke test (Locust, 30s)
-   - OWASP ZAP baseline scan (Docker container, `--network host`)
-3. **Reporting** — Allure report published to GitHub Pages (`gh-pages`)
-
-### AI RCA in CI (Fail-Safe)
-
-The AI layer **never fails the pipeline** when the API key is missing:
-
-- `GeminiAnalyzer` returns `None` if `GEMINI_API_KEY` is empty or unset
-- All HTTP / JSON errors are caught silently
-- Failed tests still fail on their own assertions — AI only adds an Allure attachment
-
-#### Enable AI RCA in GitHub Actions
-
-1. Open **Repository Settings → Secrets and variables → Actions**
-2. Create a new secret: `GEMINI_API_KEY`
-3. Paste your Google Gemini API key
-4. Re-run the workflow — failed tests will include **🤖 AI Root Cause Analysis** in Allure
-
-> If the secret is not configured, tests run normally without AI attachments.
-
----
-
-## Reporting
-
-After a successful push to `main`, the Allure report is published at:
-
-**https://artyomzabello.github.io/Myportfolio/**
-
-The report includes:
-
-- API request/response steps
-- UI interaction traces
-- Load test artifacts (when attached)
-- AI RCA summaries (when `GEMINI_API_KEY` is configured)
-
-Enable GitHub Pages: **Settings → Pages → Source: Deploy from branch `gh-pages`**.
-
----
-
-## How to Run Locally
-
-### Prerequisites
-
-- Python 3.12+
-- Docker Desktop (recommended for full SUT)
-- Git
-
-### Quick Start
+**Установка**
 
 ```bash
-# Clone and install
 git clone https://github.com/ArtyomZabello/Myportfolio.git
 cd Myportfolio
 pip install -e ".[dev]"
-playwright install chromium
-
-# Bootstrap environment
+playwright install chromium   # для UI-тестов
 cp .env.example .env
-
-# Full API pipeline (Docker or mock fallback)
-python scripts/run_all.py
 ```
 
-### Makefile (Linux / Git Bash / WSL)
+**API**
 
 ```bash
-make env                  # create .env from .env.example
-make up                   # start SUT (docker compose)
-make wait-for-backend     # poll /api/tags until ready
-make test-api             # run API tests
-make test-load            # Locust headless load test
-make test-security        # OWASP ZAP baseline scan
-make run-all              # env → up → wait → test-api → down
+docker compose -f app/docker-compose.yml up -d --build
+python scripts/wait_for_backend.py
+pytest tests/api/ -m "not demo" -v
+docker compose -f app/docker-compose.yml down -v
 ```
 
-### Windows (PowerShell)
-
-```powershell
-pip install -e ".[dev]"
-playwright install chromium
-python scripts/run_all.py          # API tests with auto mock fallback
-python scripts/wait_for_backend.py # health check only
-pytest tests/ -v --alluredir=allure-results
-```
-
-### UI Tests (requires frontend on :4200)
+**UI**
 
 ```bash
-# Option A: mock UI for local/CI parity
 python scripts/mock_conduit_ui_server.py &
-
-# Option B: run your Conduit frontend on http://localhost:4200
-pytest tests/ui/ -v --alluredir=allure-results
+python scripts/wait_for_ui.py
+pytest tests/ui/ -m "not demo" -v
 ```
 
-### View Allure Report Locally
+**Нагрузка**
 
 ```bash
-allure serve allure-results
+docker compose -f app/docker-compose.yml up -d --build
+python scripts/wait_for_backend.py
+python performance/seed_load_data.py verify
+locust -f performance/locustfile.py --headless -u 10 -r 5 --run-time 30s \
+  --host http://localhost:8000/api --html performance/locust_report.html
+python scripts/check_locust_thresholds.py
+docker compose -f app/docker-compose.yml down -v
 ```
+
+**Allure локально:** `allure serve allure-results`
+
+**Makefile (Linux / WSL):** `make env` → `make up` → `make test-api` → `make down`
+
+---
+---
+
+# English
+
+# Conduit Test Lab
+
+Pet-project for test automation. I test the [Conduit (RealWorld API)](https://github.com/gothinkster/realworld) at several levels and run everything through GitHub Actions. Reports are published on [GitHub Pages](https://artyomzabello.github.io/Myportfolio/).
 
 ---
 
-## Project Structure
+## What's tested
 
+- **API** — registration, login, articles, comments, tags (`pytest`, `httpx`)
+- **UI** — login and basic flows (`Playwright`, UI stub on `:4200`)
+- **Load** — short Locust smoke test with p95 check
+- **Security** — OWASP ZAP: baseline and OpenAPI scan
+
+## How CI works
+
+The workflow is in [`.github/workflows/main.yml`](.github/workflows/main.yml).
+
+First **lint** (`ruff`, `mypy`). If it passes, three jobs run **in parallel**:
+
+- **api-tests** — starts the system under test in Docker, runs API tests
+- **ui-tests** — Playwright in a container, UI stub on `:4200`
+- **load-security** — its own Docker stack, data prep → Locust → ZAP
+
+Then **report** downloads Allure results from all jobs, merges them, and deploys to Pages (push to `main` only). **notify** sends links to Telegram.
+
+```mermaid
+flowchart LR
+    lint --> api[api-tests]
+    lint --> ui[ui-tests]
+    lint --> load[load-security]
+    api --> report
+    ui --> report
+    load --> report
+    report --> notify
 ```
-Myportfolio/
-├── .github/workflows/main.yml   # CI/CD pipeline
-├── app/                         # Docker Compose SUT
-├── config/                      # Pydantic settings
-├── src/
-│   ├── api_client/              # API layer
-│   ├── data_factory/            # Test data builders
-│   ├── ui_pages/                # Playwright POM
-│   └── ai_engine/               # Gemini RCA
-├── tests/
-│   ├── api/
-│   ├── ui/
-│   └── unit/
-├── performance/                 # Locust scenarios
-├── security/                    # ZAP configuration
-├── scripts/                     # Cross-platform runners
-├── Makefile
-└── pyproject.toml
+
+## Main ideas
+
+- API, UI, load, and security are separate jobs, not one long run
+- API and load each start **their own** system under test in Docker — no shared database
+- Load data is fixed (`performance/datasets/load_v1.json`), with a verify step before Locust
+- Results from parallel jobs are merged in one report job
+
+A portfolio pet-project: show how to build multi-layer automation without one heavy CI job.
+
+## Technologies
+
+Python 3.12 · pytest · httpx · Pydantic · Playwright · Locust · OWASP ZAP · Allure · Docker Compose · GitHub Actions · Ruff · Mypy · Faker
+
+## Running locally
+
+**Setup**
+
+```bash
+git clone https://github.com/ArtyomZabello/Myportfolio.git
+cd Myportfolio
+pip install -e ".[dev]"
+playwright install chromium   # for UI tests
+cp .env.example .env
 ```
 
----
+**API**
 
-## Environment Variables
+```bash
+docker compose -f app/docker-compose.yml up -d --build
+python scripts/wait_for_backend.py
+pytest tests/api/ -m "not demo" -v
+docker compose -f app/docker-compose.yml down -v
+```
 
-| Variable | Default | Description |
-|---|---|---|
-| `BASE_URL` | `http://localhost:8000/api` | Conduit API base URL |
-| `UI_BASE_URL` | `http://localhost:4200` | Conduit frontend URL |
-| `API_TIMEOUT` | `10.0` | HTTP timeout (seconds) |
-| `GEMINI_API_KEY` | *(empty)* | Optional Gemini key for AI RCA |
+**UI**
 
-Copy [`.env.example`](.env.example) to `.env` and adjust as needed.
+```bash
+python scripts/mock_conduit_ui_server.py &
+python scripts/wait_for_ui.py
+pytest tests/ui/ -m "not demo" -v
+```
 
----
+**Load**
 
-## License
+```bash
+docker compose -f app/docker-compose.yml up -d --build
+python scripts/wait_for_backend.py
+python performance/seed_load_data.py verify
+locust -f performance/locustfile.py --headless -u 10 -r 5 --run-time 30s \
+  --host http://localhost:8000/api --html performance/locust_report.html
+python scripts/check_locust_thresholds.py
+docker compose -f app/docker-compose.yml down -v
+```
 
-Portfolio project — Conduit (RealWorld) test automation framework.
+**Allure locally:** `allure serve allure-results`
+
+**Makefile (Linux / WSL):** `make env` → `make up` → `make test-api` → `make down`

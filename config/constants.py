@@ -1,0 +1,95 @@
+"""Shared constants for the Conduit test automation framework."""
+
+from typing import Final
+
+# ---------------------------------------------------------------------------
+# API endpoint paths (relative to ``Config.BASE_URL``)
+# ---------------------------------------------------------------------------
+API_PATH_TAGS: Final[str] = "/tags"
+API_PATH_ARTICLES: Final[str] = "/articles"
+API_PATH_USERS: Final[str] = "/users"
+API_PATH_USERS_LOGIN: Final[str] = "/users/login"
+
+
+def profile_path(username: str) -> str:
+    """Build the relative profile endpoint for the given username."""
+    return f"/profiles/{username}"
+
+
+def article_path(slug: str) -> str:
+    """Build the relative single-article endpoint."""
+    return f"/articles/{slug}"
+
+
+def article_comments_path(slug: str) -> str:
+    """Build the relative article comments collection endpoint."""
+    return f"/articles/{slug}/comments"
+
+
+def article_comment_path(slug: str, comment_id: int) -> str:
+    """Build the relative single-comment endpoint."""
+    return f"/articles/{slug}/comments/{comment_id}"
+
+
+# ---------------------------------------------------------------------------
+# HTTP status codes referenced across API and load tests
+# ---------------------------------------------------------------------------
+HTTP_OK: Final[int] = 200
+HTTP_CREATED: Final[int] = 201
+HTTP_BAD_REQUEST: Final[int] = 400
+HTTP_UNAUTHORIZED: Final[int] = 401
+HTTP_FORBIDDEN: Final[int] = 403
+HTTP_UNPROCESSABLE: Final[int] = 422
+HTTP_NOT_FOUND: Final[int] = 404
+
+SUCCESS_CREATE_STATUSES: Final[frozenset[int]] = frozenset({HTTP_OK, HTTP_CREATED})
+
+# FastAPI backend returns 400 for failed logins; mock/spec may return 422/401/403.
+LOGIN_REJECTION_STATUSES: Final[frozenset[int]] = frozenset(
+    {HTTP_BAD_REQUEST, HTTP_UNAUTHORIZED, HTTP_FORBIDDEN, HTTP_UNPROCESSABLE},
+)
+
+# Missing article lookups: RealWorld spec uses 404, FastAPI backend uses 400.
+ARTICLE_NOT_FOUND_STATUSES: Final[frozenset[int]] = frozenset({HTTP_BAD_REQUEST, HTTP_NOT_FOUND})
+
+# Negative auth paths differ between RealWorld spec (422/401) and FastAPI backend (400/403).
+REJECTED_VALIDATION_STATUSES: Final[frozenset[int]] = frozenset(
+    {HTTP_BAD_REQUEST, HTTP_UNPROCESSABLE},
+)
+REJECTED_AUTH_STATUSES: Final[frozenset[int]] = frozenset({HTTP_UNAUTHORIZED, HTTP_FORBIDDEN})
+
+# ---------------------------------------------------------------------------
+# Backend health polling (``scripts/wait_for_backend.py``)
+# ---------------------------------------------------------------------------
+BACKEND_HEALTH_TIMEOUT_SECONDS: Final[int] = 30
+BACKEND_POLL_INTERVAL_SECONDS: Final[float] = 1.0
+
+# ---------------------------------------------------------------------------
+# Locust load profile
+# ---------------------------------------------------------------------------
+LOCUST_ARTICLE_PAGE_LIMIT: Final[int] = 10
+LOCUST_ARTICLE_PAGE_OFFSET: Final[int] = 0
+LOCUST_WAIT_MIN_SECONDS: Final[float] = 1.0
+LOCUST_WAIT_MAX_SECONDS: Final[float] = 3.0
+LOCUST_DATASET_V1_PATH: Final[str] = "performance/datasets/load_v1.json"
+
+# Profile lookup semantics for load tests (seeded users expect 200 after verify).
+PROFILE_LOOKUP_SUCCESS_STATUSES: Final[frozenset[int]] = frozenset({HTTP_OK})
+PROFILE_LOOKUP_MISSING_STATUSES: Final[frozenset[int]] = frozenset({HTTP_NOT_FOUND})
+PROFILE_LOOKUP_BACKEND_ANOMALY_STATUSES: Final[frozenset[int]] = frozenset({HTTP_BAD_REQUEST})
+
+# ---------------------------------------------------------------------------
+# Mock UI credentials (must stay in sync with ``scripts/mock_conduit_ui/login.html``)
+# ---------------------------------------------------------------------------
+MOCK_UI_VALID_USERNAME: Final[str] = "testuser"
+MOCK_UI_VALID_EMAIL: Final[str] = "test@example.com"
+MOCK_UI_VALID_PASSWORD: Final[str] = "password123"
+MOCK_UI_INVALID_USERNAME: Final[str] = "baduser"
+MOCK_UI_INVALID_EMAIL: Final[str] = "wrong@example.com"
+MOCK_UI_INVALID_PASSWORD: Final[str] = "wrongpassword"
+MOCK_UI_LOGIN_ERROR_MESSAGE: Final[str] = "Invalid email or password"
+
+# ---------------------------------------------------------------------------
+# AI RCA demonstration payload
+# ---------------------------------------------------------------------------
+DEMO_INVALID_REGISTRATION_EMAIL: Final[str] = "plainaddress"

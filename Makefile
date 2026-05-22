@@ -16,7 +16,7 @@ run-all-py:
 	python scripts/run_all.py
 
 test-api:
-	pytest tests/api/ -v --alluredir=allure-results
+	pytest tests/api/ -m "not demo" -v --alluredir=allure-results
 
 test-load:
 	locust -f performance/locustfile.py --headless -u 50 -r 10 --run-time 1m --host $$(python -c "from config.settings import Config; print(Config().BASE_URL.rstrip('/'))")

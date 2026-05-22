@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "profile_users": [
+    {
+      "username": "load_v1_user_01",
+      "email": "load_v1_user_01@load.example.com",
+      "password": "LoadPass_v1_01!"
+    },
+    {
+      "username": "load_v1_user_02",
+      "email": "load_v1_user_02@load.example.com",
+      "password": "LoadPass_v1_02!"
+    },
+    {
+      "username": "load_v1_user_03",
+      "email": "load_v1_user_03@load.example.com",
+      "password": "LoadPass_v1_03!"
+    },
+    {
+      "username": "load_v1_user_04",
+      "email": "load_v1_user_04@load.example.com",
+      "password": "LoadPass_v1_04!"
+    }
+  ],
+  "login_rejection_emails": [
+    "load_v1_reject_01@load.example.com",
+    "load_v1_reject_02@load.example.com",
+    "load_v1_reject_03@load.example.com",
+    "load_v1_reject_04@load.example.com"
+  ]
+}

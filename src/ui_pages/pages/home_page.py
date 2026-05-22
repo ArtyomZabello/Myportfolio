@@ -20,16 +20,11 @@ class HomePage(BasePage):
         """Navigate to the sign-in page using the top navigation link."""
         from ui_pages.pages.login_page import LoginPage
 
-        self.click(self.SIGN_IN_LINK, name="Open Sign in page")
+        self.click(self.SIGN_IN_LINK, name="Open sign-in page")
         return LoginPage(self.page)
-
-    def wait_for_global_feed(self) -> HomePage:
-        """Wait until the global feed tab is visible on the home page."""
-        self.wait_for_visible(self.GLOBAL_FEED_TAB, name="Wait for Global Feed tab")
-        return self
 
     def assert_home_page_loaded(self) -> HomePage:
         """Assert that primary home page navigation elements are visible."""
-        self.wait_for_visible(self.GLOBAL_FEED_TAB, name="Assert Global Feed tab is visible")
-        self.wait_for_visible(self.SIGN_IN_LINK, name="Assert Sign in link is visible")
+        self.wait_for_visible(self.GLOBAL_FEED_TAB, name="Verify Global Feed tab is visible")
+        self.wait_for_visible(self.SIGN_IN_LINK, name="Verify Sign in link is visible")
         return self

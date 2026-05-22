@@ -2,94 +2,91 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 import allure
 import pytest
 
-from api_client.base_client import BaseAPIClient
+from api_client.services.articles_service import ArticlesService
+from api_client.services.auth_service import AuthService
+from config.constants import (
+    DEMO_INVALID_REGISTRATION_EMAIL,
+    LOGIN_REJECTION_STATUSES,
+    REJECTED_AUTH_STATUSES,
+    SUCCESS_CREATE_STATUSES,
+)
 from data_factory.builders import ArticleDTO
 
 
 @pytest.mark.parametrize(
-    ("credentials", "expected_status"),
+    "credentials",
     [
         pytest.param(
             {"email": "not-an-email", "password": "ValidPassword123!"},
-            422,
             id="invalid-email-format",
         ),
         pytest.param(
             {"email": "missing@example.com", "password": ""},
-            422,
             id="empty-password",
         ),
         pytest.param(
             {"email": "unknown@example.com", "password": "WrongPassword123!"},
-            401,
             id="unknown-credentials",
         ),
     ],
 )
+@pytest.mark.security
+@pytest.mark.regression
 @allure.feature("Authentication")
 @allure.story("Login")
-@allure.title("POST /users/login rejects invalid credentials ({expected_status})")
+@allure.title("POST /users/login rejects invalid credentials")
 def test_login_with_invalid_credentials(
-    api_client: BaseAPIClient,
+    auth_service: AuthService,
     credentials: dict[str, str],
-    expected_status: int,
 ) -> None:
     """Verify the login endpoint rejects malformed or incorrect credentials."""
     with allure.step("Attempt login with invalid credentials"):
-        response = api_client.post("/users/login", json={"user": credentials})
+        status_code = auth_service.login_raw(credentials)
 
-    with allure.step(f"Verify the API responds with HTTP {expected_status}"):
-        assert response.status_code == expected_status, response.text
+    with allure.step("Verify API returns a login rejection status"):
+        assert status_code in LOGIN_REJECTION_STATUSES
 
 
+@pytest.mark.security
+@pytest.mark.regression
 @allure.feature("Articles")
 @allure.story("Authorization")
-@allure.title("POST /articles without token returns 401 Unauthorized")
+@allure.title("POST /articles without token is rejected")
 def test_create_article_without_token_returns_unauthorized(
-    api_client: BaseAPIClient,
+    articles_service: ArticlesService,
 ) -> None:
     """Verify article creation is blocked when no authentication token is supplied."""
     article = ArticleDTO.generate()
-    payload: dict[str, Any] = {
-        "article": {
-            "title": article.title,
-            "description": article.description,
-            "body": article.body,
-            "tagList": article.tags,
-        }
-    }
 
-    with allure.step("Attempt to create an article without Authorization header"):
-        response = api_client.post("/articles", json=payload)
+    with allure.step("Attempt to create article without Authorization header"):
+        status_code = articles_service.create_article_unauthenticated(article)
 
-    with allure.step("Verify the API rejects the unauthenticated request"):
-        assert response.status_code == 401, response.text
+    with allure.step("Verify API rejects unauthenticated request"):
+        assert status_code in REJECTED_AUTH_STATUSES
 
 
+@pytest.mark.demo
 @allure.feature("Authentication")
 @allure.story("Registration")
 @allure.title("Intentional failure — invalid email registration (AI RCA demo)")
-def test_intentional_failure_for_ai_analysis(api_client: BaseAPIClient) -> None:
+def test_intentional_failure_for_ai_analysis(auth_service: AuthService) -> None:
     """Demonstrate AI root cause analysis on a deliberately failing assertion.
 
-    Sends a registration request with an invalid email address and asserts
-    HTTP 201 even though the backend is expected to return 422 Unprocessable Entity.
+    Excluded from the default CI pipeline via ``-m "not demo"``.
     """
     payload = {
         "user": {
             "username": "invaliduser",
-            "email": "plainaddress",
+            "email": DEMO_INVALID_REGISTRATION_EMAIL,
             "password": "ValidPassword123!",
         }
     }
 
-    with allure.step("Отправляем запрос на регистрацию с невалидным email"):
-        response = api_client.post("/users", json=payload)
+    with allure.step("Submit registration request with invalid email"):
+        status_code = auth_service.register_raw(payload)
 
-    with allure.step("Проверяем успешную регистрацию (намеренно упадет)"):
-        assert response.status_code == 201
+    with allure.step("Verify registration succeeds (intentional failure)"):
+        assert status_code in SUCCESS_CREATE_STATUSES
