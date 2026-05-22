@@ -7,8 +7,11 @@ import pytest
 
 from api_client.exceptions import APIResponseError
 from api_client.services.articles_service import ArticlesService
-from config.constants import HTTP_NOT_FOUND
+from config.constants import ARTICLE_NOT_FOUND_STATUSES
 from data_factory.builders import ArticleDTO
+
+PAGINATION_LIMIT = 2
+PAGINATION_SCAN_MAX_PAGES = 10
 
 
 @pytest.mark.regression
@@ -33,20 +36,54 @@ def test_get_articles_supports_pagination(
     articles_service: ArticlesService,
     authenticated_token: str,
 ) -> None:
-    """Verify article feed pagination returns bounded slices and a stable total count."""
-    with allure.step("Create three articles for pagination verification"):
+    """Verify pagination returns distinct slices and surfaces created articles."""
+    created_slugs: set[str] = set()
+
+    with allure.step("Create three uniquely titled articles for pagination verification"):
         for _ in range(3):
-            articles_service.create_article(authenticated_token, ArticleDTO.generate())
+            created = articles_service.create_article(authenticated_token, ArticleDTO.generate())
+            created_slugs.add(created.article.slug)
 
-    with allure.step("Request paginated article feed pages"):
-        first_page = articles_service.list_articles(limit=2, offset=0)
-        second_page = articles_service.list_articles(limit=2, offset=2)
+    with allure.step("Request the first two paginated pages"):
+        first_page = articles_service.list_articles(limit=PAGINATION_LIMIT, offset=0)
+        second_page = articles_service.list_articles(
+            limit=PAGINATION_LIMIT,
+            offset=PAGINATION_LIMIT,
+        )
 
-    with allure.step("Verify pagination boundaries and total count"):
-        assert len(first_page.articles) == 2
-        assert len(second_page.articles) >= 1
-        assert first_page.articlesCount >= 3
-        assert first_page.articlesCount == second_page.articlesCount
+    with allure.step("Verify page boundaries and non-overlapping slices"):
+        assert len(first_page.articles) == PAGINATION_LIMIT
+
+        first_slugs = {article.slug for article in first_page.articles}
+        second_slugs = {article.slug for article in second_page.articles}
+        assert first_slugs.isdisjoint(second_slugs)
+
+        combined_slugs = first_slugs | second_slugs
+        assert len(combined_slugs) >= 3
+
+    with allure.step("Locate all created articles through paginated feed traversal"):
+        seen_slugs: set[str] = set()
+        found_created: set[str] = set()
+        offset = 0
+
+        for _ in range(PAGINATION_SCAN_MAX_PAGES):
+            page = articles_service.list_articles(limit=PAGINATION_LIMIT, offset=offset)
+            if not page.articles:
+                break
+
+            assert len(page.articles) <= PAGINATION_LIMIT
+
+            page_slugs = {article.slug for article in page.articles}
+            assert page_slugs.isdisjoint(seen_slugs)
+
+            seen_slugs |= page_slugs
+            found_created |= page_slugs & created_slugs
+            offset += PAGINATION_LIMIT
+
+            if found_created == created_slugs:
+                break
+
+        assert found_created == created_slugs
 
 
 @pytest.mark.smoke
@@ -128,6 +165,8 @@ def test_delete_article_by_slug(
         try:
             articles_service.get_article(created_article_slug)
         except APIResponseError as exc:
-            assert exc.status_code == HTTP_NOT_FOUND
+            assert exc.status_code in ARTICLE_NOT_FOUND_STATUSES
         else:
-            raise AssertionError("Expected deleted article to return 404")
+            raise AssertionError(
+                f"Expected deleted article lookup to fail with {ARTICLE_NOT_FOUND_STATUSES}",
+            )

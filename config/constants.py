@@ -44,6 +44,14 @@ HTTP_NOT_FOUND: Final[int] = 404
 
 SUCCESS_CREATE_STATUSES: Final[frozenset[int]] = frozenset({HTTP_OK, HTTP_CREATED})
 
+# FastAPI backend returns 400 for failed logins; mock/spec may return 422/401/403.
+LOGIN_REJECTION_STATUSES: Final[frozenset[int]] = frozenset(
+    {HTTP_BAD_REQUEST, HTTP_UNAUTHORIZED, HTTP_FORBIDDEN, HTTP_UNPROCESSABLE},
+)
+
+# Missing article lookups: RealWorld spec uses 404, FastAPI backend uses 400.
+ARTICLE_NOT_FOUND_STATUSES: Final[frozenset[int]] = frozenset({HTTP_BAD_REQUEST, HTTP_NOT_FOUND})
+
 # Negative auth paths differ between RealWorld spec (422/401) and FastAPI backend (400/403).
 REJECTED_VALIDATION_STATUSES: Final[frozenset[int]] = frozenset(
     {HTTP_BAD_REQUEST, HTTP_UNPROCESSABLE},

@@ -1,5 +1,6 @@
 """Synchronous HTTP client foundation for Conduit API interactions."""
 
+import json
 from typing import Any
 
 import allure
@@ -60,6 +61,14 @@ class BaseAPIClient:
                 name="Base URL",
                 attachment_type=allure.attachment_type.TEXT,
             )
+
+            request_json = kwargs.get("json")
+            if request_json is not None:
+                allure.attach(
+                    json.dumps(request_json, default=str),
+                    name="Request JSON",
+                    attachment_type=allure.attachment_type.JSON,
+                )
 
             try:
                 response = self._client.request(normalized_method, endpoint, **kwargs)

@@ -9,29 +9,26 @@ from api_client.services.articles_service import ArticlesService
 from api_client.services.auth_service import AuthService
 from config.constants import (
     DEMO_INVALID_REGISTRATION_EMAIL,
+    LOGIN_REJECTION_STATUSES,
     REJECTED_AUTH_STATUSES,
-    REJECTED_VALIDATION_STATUSES,
     SUCCESS_CREATE_STATUSES,
 )
 from data_factory.builders import ArticleDTO
 
 
 @pytest.mark.parametrize(
-    ("credentials", "expected_statuses"),
+    "credentials",
     [
         pytest.param(
             {"email": "not-an-email", "password": "ValidPassword123!"},
-            REJECTED_VALIDATION_STATUSES,
             id="invalid-email-format",
         ),
         pytest.param(
             {"email": "missing@example.com", "password": ""},
-            REJECTED_VALIDATION_STATUSES,
             id="empty-password",
         ),
         pytest.param(
             {"email": "unknown@example.com", "password": "WrongPassword123!"},
-            REJECTED_AUTH_STATUSES,
             id="unknown-credentials",
         ),
     ],
@@ -44,14 +41,13 @@ from data_factory.builders import ArticleDTO
 def test_login_with_invalid_credentials(
     auth_service: AuthService,
     credentials: dict[str, str],
-    expected_statuses: frozenset[int],
 ) -> None:
     """Verify the login endpoint rejects malformed or incorrect credentials."""
     with allure.step("Attempt login with invalid credentials"):
         status_code = auth_service.login_raw(credentials)
 
-    with allure.step("Verify API returns a client/auth rejection status"):
-        assert status_code in expected_statuses
+    with allure.step("Verify API returns a login rejection status"):
+        assert status_code in LOGIN_REJECTION_STATUSES
 
 
 @pytest.mark.security

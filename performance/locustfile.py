@@ -19,8 +19,7 @@ from config.constants import (
     LOCUST_PROFILE_USERNAMES,
     LOCUST_WAIT_MAX_SECONDS,
     LOCUST_WAIT_MIN_SECONDS,
-    REJECTED_AUTH_STATUSES,
-    REJECTED_VALIDATION_STATUSES,
+    LOGIN_REJECTION_STATUSES,
     profile_path,
 )
 from config.settings import Config
@@ -111,7 +110,7 @@ class UserBehavior(FastHttpUser):
             name="POST /users/login",
             catch_response=True,
         ) as response:
-            if response.status_code in REJECTED_AUTH_STATUSES | REJECTED_VALIDATION_STATUSES:
+            if response.status_code in LOGIN_REJECTION_STATUSES:
                 response.success()
             elif response.status_code != HTTP_OK:
                 response.failure(f"Unexpected status {response.status_code}")

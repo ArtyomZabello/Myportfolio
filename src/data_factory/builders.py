@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import ClassVar, Self
+from uuid import uuid4
 
 from faker import Faker
 from pydantic import BaseModel, Field
@@ -72,8 +73,9 @@ class ArticleDTO(BaseModel):
     @classmethod
     def generate(cls, *, tag_count: int = 3) -> Self:
         """Build an article populated with realistic fake content."""
+        unique_suffix = uuid4().hex[:12]
         return cls(
-            title=cls._faker.sentence(nb_words=4).rstrip("."),
+            title=f"{cls._faker.sentence(nb_words=4).rstrip('.')} {unique_suffix}",
             description=cls._faker.sentence(nb_words=8),
             body=cls._faker.paragraph(nb_sentences=5),
             tags=[cls._faker.word() for _ in range(tag_count)],
