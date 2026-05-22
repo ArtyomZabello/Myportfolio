@@ -93,7 +93,9 @@ jobs:
           --html performance/locust_report.html
 
       - name: Run security scan
+        if: always()
         run: |
+          chmod 777 ${{ github.workspace }}/security
           docker run --rm --network host \
             -v "${{ github.workspace }}/security:/zap/wrk/:rw" \
             -t ghcr.io/zaproxy/zaproxy:stable \
