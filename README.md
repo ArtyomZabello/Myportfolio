@@ -4,9 +4,18 @@
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![Allure Report](https://img.shields.io/badge/report-allure-orange.svg)](https://artyomzabello.github.io/Myportfolio/)
 
-Pet-проект по автоматизации тестирования. Проверяю [Conduit (RealWorld API)](https://github.com/gothinkster/realworld) на нескольких уровнях и прогоняю всё через GitHub Actions. Отчёты лежат на [GitHub Pages](https://artyomzabello.github.io/Myportfolio/).
+Pet-проект по автоматизации тестирования. Проверяю [Conduit (RealWorld API)](https://github.com/gothinkster/realworld) на нескольких уровнях и прогоняю всё через GitHub Actions.
 
 > English version — [below](#english)
+
+## Отчёты
+
+После прогона на `main` обновляются четыре отчёта на GitHub Pages:
+
+- [Функционал (Allure)](https://artyomzabello.github.io/Myportfolio/)
+- [Нагрузка (Locust)](https://artyomzabello.github.io/Myportfolio/locust_report.html)
+- [Security (API Scan)](https://artyomzabello.github.io/Myportfolio/zap_api_report.html)
+- [Security (Baseline)](https://artyomzabello.github.io/Myportfolio/zap_baseline_report.html)
 
 ---
 
@@ -105,7 +114,16 @@ docker compose -f app/docker-compose.yml down -v
 
 # Conduit Test Lab
 
-Pet-project for test automation. I test the [Conduit (RealWorld API)](https://github.com/gothinkster/realworld) at several levels and run everything through GitHub Actions. Reports are published on [GitHub Pages](https://artyomzabello.github.io/Myportfolio/).
+Pet-project for test automation. I test the [Conduit (RealWorld API)](https://github.com/gothinkster/realworld) at several levels and run everything through GitHub Actions.
+
+## Reports
+
+After a run on `main`, four reports are published on GitHub Pages:
+
+- [Functional (Allure)](https://artyomzabello.github.io/Myportfolio/)
+- [Load (Locust)](https://artyomzabello.github.io/Myportfolio/locust_report.html)
+- [Security (API Scan)](https://artyomzabello.github.io/Myportfolio/zap_api_report.html)
+- [Security (Baseline)](https://artyomzabello.github.io/Myportfolio/zap_baseline_report.html)
 
 ---
 
